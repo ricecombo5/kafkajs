@@ -446,7 +446,7 @@ module.exports = class Connection {
         if (e.retriable || e.transient) {
           logLevel = this.logWarn
         }
-        this.logLevel(`Response ${requestInfo(entry)}`, {
+        logLevel(`Response ${requestInfo(entry)}`, {
           error: e.message,
           correlationId,
           size,
