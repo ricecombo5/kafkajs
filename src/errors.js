@@ -10,6 +10,7 @@ class KafkaJSError extends Error {
     this.retriable = retriable
     this.helpUrl = e.helpUrl
     this.cause = cause
+    this.transient = isRebalancing(e)
   }
 }
 
