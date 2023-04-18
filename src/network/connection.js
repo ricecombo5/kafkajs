@@ -113,6 +113,7 @@ module.exports = class Connection {
 
     this.logDebug = log('debug')
     this.logError = log('error')
+    this.logWarn = log('warn')
 
     const env = getEnv()
     this.shouldLogBuffers = env.KAFKAJS_DEBUG_PROTOCOL_BUFFERS === '1'
@@ -212,7 +213,7 @@ module.exports = class Connection {
           code: e.code,
         })
 
-        this.logError(error.message, { stack: e.stack })
+        this.logWarn(error.message, { stack: e.stack })
         this.rejectRequests(error)
         await this.disconnect()
 
@@ -224,7 +225,7 @@ module.exports = class Connection {
           broker: `${this.host}:${this.port}`,
         })
 
-        this.logError(error.message)
+        this.logWarn(error.message)
         this.rejectRequests(error)
         await this.disconnect()
         reject(error)
@@ -441,7 +442,11 @@ module.exports = class Connection {
       return data
     } catch (e) {
       if (logResponseError) {
-        this.logError(`Response ${requestInfo(entry)}`, {
+        let logLevel = this.logError
+        if (e.retriable || e.transient) {
+          logLevel = this.logWarn
+        }
+        this.logLevel(`Response ${requestInfo(entry)}`, {
           error: e.message,
           correlationId,
           size,
